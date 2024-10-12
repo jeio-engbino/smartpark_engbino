@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:smartPark
+  h2:
+    console.enabled: true
+  sql:
+    init:
+      platform: h2
+      data-locations: classpath:/ddl.sql
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml

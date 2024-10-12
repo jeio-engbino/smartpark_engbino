@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.smartparking.mapper.VehicleMapper">
+    <resultMap id="baseResultMap" type="org.smartparking.model.Vehicle">
+        <id column="plate_id" property="plateId" />
+        <result column="vehicle_type" property="vehicleType" />
+        <result column="owner_name" property="ownerName" />
+        <result column="lot_id" property="lotId" />
+        <result column="created_at" property="createdAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="updated_by" property="updatedBy" />
+    </resultMap>
+
+    <insert id="insertVehicle" parameterType="org.smartparking.dto.VehicleDto">
+        INSERT INTO vehicle (plate_id, owner_name, vehicle_type, created_by, updated_by)
+        VALUES (#{plateId}, #{ownerName}, #{vehicleType}, 'system', 'system')
+    </insert>
+
+    <update id="updateVehicle">
+        UPDATE vehicle
+        SET lot_id = #{parkingLotId},
+            updated_by = 'system'
+        WHERE plate_id = #{plateId}
+    </update>
+
+    <select id="getVehicleByPlate" resultMap="baseResultMap">
+        SELECT lot_id, vehicle_type
+        FROM vehicle
+        WHERE plate_id = #{plateId}
+    </select>
+
+    <select id="getLotIdByVehicle" resultType="java.lang.String">
+        SELECT lot_id
+        FROM vehicle
+        WHERE plate_id = #{plateId}
+    </select>
+
+    <select id="queryParkedVehicleList" resultMap="baseResultMap">
+        SELECT *
+        FROM vehicle
+        <where>
+            <if test="lotId == null or lotId == ''">
+                lot_id != ''
+            </if>
+            <if test="lotId != null and lotId != ''">
+                lot_id = #{lotId}
+            </if>
+            <if test="ownerName != null and ownerName != ''">
+                and owner_name = #{ownerName}
+            </if>
+            <if test="plateId != null and plateId != ''">
+                and plate_id = #{plateId}
+            </if>
+            <if test="vehicleType != null and vehicleType != ''">
+                and vehicle_type = #{vehicleType}
+            </if>
+        </where>
+        ORDER BY updated_at desc
+    </select>
+</mapper>

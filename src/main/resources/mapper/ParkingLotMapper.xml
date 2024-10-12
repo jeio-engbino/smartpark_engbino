@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.smartparking.mapper.ParkingLotMapper">
+    <resultMap id="baseResultMap" type="org.smartparking.model.ParkingLot">
+        <id column="lot_id" property="lotId" />
+        <result column="location" property="location" />
+        <result column="capacity" property="capacity" />
+        <result column="occupied" property="occupied" />
+        <result column="created_at" property="createdAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="updated_by" property="updatedBy" />
+    </resultMap>
+
+    <insert id="insertParkingLot" parameterType="org.smartparking.dto.ParkingLotDto">
+        INSERT INTO parking_lot (lot_id, location, capacity, created_by, updated_by)
+        VALUES (#{lotId},
+                #{location},
+                #{capacity},
+                'system',
+                'system')
+    </insert>
+
+    <update id="updateOccupiedCount">
+        UPDATE parking_lot
+        SET occupied = #{occupiedCount},
+            updated_by = 'system'
+        WHERE lot_id = #{lotId}
+    </update>
+
+    <select id="checkLocation" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM parking_lot
+        WHERE location = #{location}
+    </select>
+
+    <select id="checkLotId" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM parking_lot
+        WHERE lot_id = #{lotId}
+    </select>
+
+    <select id="getCapacityCount" resultType="org.smartparking.model.ParkingLot">
+        SELECT capacity, occupied
+        FROM parking_lot
+        WHERE lot_id = #{lotId}
+    </select>
+
+    <select id="getLotInfoById" resultMap="baseResultMap">
+        SELECT *
+        FROM parking_lot
+        WHERE lot_id = #{lotId}
+    </select>
+
+    <select id="queryParkingLotList" resultMap="baseResultMap">
+        SELECT *
+        FROM parking_lot
+        <where>
+            <if test="lotId != null and lotId != ''">
+                lot_id = #{lotId}
+            </if>
+            <if test="isFull != null">
+                <if test="isFull == true">
+                    and capacity = occupied
+                </if>
+                <if test="isFull == false">
+                    and capacity > occupied
+                </if>
+            </if>
+            <if test="location != null and location != ''">
+                and location = #{location}
+            </if>
+        </where>
+        ORDER BY location,occupied desc
+    </select>
+</mapper>
